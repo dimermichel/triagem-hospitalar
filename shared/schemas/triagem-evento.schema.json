@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sus.gov.br/schemas/triagem-evento.json",
+  "title": "TriagemEvento",
+  "description": "Contrato de evento publicado pelo ms-triagem no SQS de classificação",
+  "type": "object",
+  "required": [
+    "triagem_id", "hospital_id", "nome", "idade",
+    "queixa_principal", "sinais_vitais",
+    "intensidade_dor", "nivel_consciencia", "criado_em"
+  ],
+  "properties": {
+    "triagem_id":       { "type": "string", "format": "uuid" },
+    "hospital_id":      { "type": "string" },
+    "nome":             { "type": "string", "minLength": 2 },
+    "idade":            { "type": "integer", "minimum": 0, "maximum": 130 },
+    "queixa_principal": { "type": "string", "minLength": 3 },
+    "sinais_vitais": {
+      "type": "object",
+      "required": ["pressao_sistolica", "pressao_diastolica", "frequencia_cardiaca", "temperatura", "saturacao_oxigenio"],
+      "properties": {
+        "pressao_sistolica":      { "type": "integer", "minimum": 50,  "maximum": 300 },
+        "pressao_diastolica":     { "type": "integer", "minimum": 20,  "maximum": 200 },
+        "frequencia_cardiaca":    { "type": "integer", "minimum": 20,  "maximum": 300 },
+        "temperatura":            { "type": "number",  "minimum": 30,  "maximum": 45  },
+        "saturacao_oxigenio":     { "type": "integer", "minimum": 50,  "maximum": 100 },
+        "frequencia_respiratoria":{ "type": "integer", "minimum": 5,   "maximum": 60  },
+        "glicemia":               { "type": "integer", "minimum": 20,  "maximum": 600 }
+      }
+    },
+    "intensidade_dor":    { "type": "integer", "minimum": 0, "maximum": 10 },
+    "nivel_consciencia":  { "type": "string", "enum": ["ALERTA", "CONFUSO", "SONOLENTO", "INCONSCIENTE"] },
+    "inicio_subito":      { "type": "boolean" },
+    "horas_sintoma":      { "type": "integer", "minimum": 0 },
+    "historico_medico":   { "type": "array", "items": { "type": "string" } },
+    "gestante":           { "type": "boolean" },
+    "criado_em":          { "type": "string", "format": "date-time" }
+  }
+}

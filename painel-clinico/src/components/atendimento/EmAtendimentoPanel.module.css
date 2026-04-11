@@ -1,0 +1,154 @@
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.titulo {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vazia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: #a0aec0;
+}
+
+.vaziaIcon {
+  font-size: 48px;
+}
+
+.vazia p {
+  font-size: 18px;
+  margin: 0;
+}
+
+.contagem {
+  background: #38a169;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--cor-bg);
+  border: 1.5px solid var(--cor-border);
+  border-radius: 10px;
+  padding: 14px 16px 14px 0;
+  position: relative;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.leftBar {
+  width: 5px;
+  align-self: stretch;
+  background: var(--cor-border);
+  border-radius: 0 3px 3px 0;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.nome {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.idade {
+  font-size: 13px;
+  color: #718096;
+}
+
+.corBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--cor-badge);
+  border-radius: 20px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.queixa {
+  font-size: 14px;
+  color: #4a5568;
+  margin: 0 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+}
+
+.metaItem {
+  font-size: 12px;
+  color: #718096;
+}
+
+.metaLabel {
+  font-weight: 600;
+  color: var(--cor-text);
+  opacity: 0.7;
+}
+
+.btnFinalizar {
+  flex-shrink: 0;
+  background: var(--cor-badge);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btnFinalizar:hover { opacity: 0.85; }
+.btnFinalizar:active { transform: scale(0.97); }

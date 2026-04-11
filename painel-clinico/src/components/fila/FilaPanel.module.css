@@ -1,0 +1,100 @@
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.titulo {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3748;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vazia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: #a0aec0;
+}
+
+.vaziaIcon {
+  font-size: 48px;
+}
+
+.vazia p {
+  font-size: 18px;
+  margin: 0;
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.secaoHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid;
+}
+
+.secaoEmoji {
+  font-size: 20px;
+}
+
+.secaoLabel {
+  font-size: 16px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.secaoContagem {
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.alerta {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c53030;
+  background: #fff5f5;
+  border: 1px solid #fc8181;
+  border-radius: 20px;
+  padding: 2px 10px;
+  animation: piscar 1s ease-in-out infinite;
+}
+
+@keyframes piscar {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.tempoMax {
+  font-size: 12px;
+  color: #718096;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: sus-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs,dynamodb,lambda,apigateway,events
+      - DEBUG=0
+      - PERSISTENCE=1
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ./scripts/localstack-init.sh:/etc/localstack/init/ready.d/init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aurora PostgreSQL (simulado localmente)
+  postgres:
+    image: postgres:16-alpine
+    container_name: sus-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=susadmin
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=triagem_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U susadmin -d triagem_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Painel React em modo dev
+  painel:
+    image: node:20-alpine
+    container_name: sus-painel
+    working_dir: /app
+    volumes:
+      - ../painel-clinico:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      - VITE_API_URL=http://localhost:8080
+      - VITE_WS_URL=ws://localhost:8084/ws
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+volumes:
+  localstack_data:
+  postgres_data:
