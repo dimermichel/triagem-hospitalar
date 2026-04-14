@@ -32,6 +32,9 @@ resource "aws_rds_cluster" "nacional" {
   final_snapshot_identifier = "sus-triagem-final-snapshot"
   deletion_protection     = var.deletion_protection
 
+  # Permite acesso do Lambda ms-nacional-consumer (definido em nacional-consumer.tf)
+  vpc_security_group_ids = [aws_security_group.nacional_rds.id]
+
   serverlessv2_scaling_configuration {
     min_capacity = 0.5
     max_capacity = 4.0

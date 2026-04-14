@@ -24,6 +24,9 @@ public class NacionalConsumerHandler implements RequestHandler<SQSEvent, Void> {
 
     @Override
     public Void handleRequest(SQSEvent event, Context context) {
+        LOG.infof("Recebendo %d mensagens da fila nacional", event.getRecords().size());
+        LOG.infof("Contexto: %s", context);
+        LOG.infof("Event: %s", event);
         for (var msg : event.getRecords()) {
             try {
                 var attrs   = msg.getMessageAttributes();

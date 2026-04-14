@@ -28,7 +28,8 @@ public class ConsolidadorScheduler implements RequestHandler<Map<String, Object>
     public Void handleRequest(Map<String, Object> event, Context context) {
         LocalDate data = LocalDate.now();
         LOG.infof("Iniciando consolidação diária: data=%s", data);
-
+        LOG.infof("Evento recebido: %s", event);
+        LOG.infof("Contexto: %s", context);
         try {
             List<AtendimentoDiarioDTO> atendimentos = consolidadorService.consolidarDia(data);
             consolidadorService.publicarNacional(data, atendimentos);

@@ -22,6 +22,11 @@ public class ConsolidadorService {
 
     private static final Logger LOG = Logger.getLogger(ConsolidadorService.class);
     private static final ZoneId BRASILIA = ZoneId.of("America/Sao_Paulo");
+    private static final String STATUS = "status";
+    private static final String STATUS_EM_ATENDIMENTO = "EM_ATENDIMENTO";
+    private static final String STATUS_FINALIZADO = "FINALIZADO";
+    private static final String STATUS_ALTA = "ALTA";
+    private static final String STATUS_TRANSFERIDO = "TRANSFERIDO";
 
     @Inject
     DynamoDbClient dynamoDbClient;
@@ -51,9 +56,16 @@ public class ConsolidadorService {
                 .expressionAttributeValues(Map.of(":pk", AttributeValue.fromS(pk)))
                 .build();
 
+        LOG.infof("Consulta de atendimentos para data: %s", data);
+        LOG.infof("Consulta: %s", query);
+
         List<Map<String, AttributeValue>> items = new ArrayList<>();
         QueryResponse resp = dynamoDbClient.query(query);
         items.addAll(resp.items());
+
+        LOG.info(items);
+        LOG.infof("Total de registros: %d", items.size());
+        LOG.infof("Consulta concluída com sucesso");
 
         // Paginar se houver mais resultados
         while (resp.lastEvaluatedKey() != null && !resp.lastEvaluatedKey().isEmpty()) {
@@ -62,16 +74,16 @@ public class ConsolidadorService {
             items.addAll(resp.items());
         }
 
-        // Filtra os atendimentos do dia (finalizados ou em atendimento)
-        return items.stream()
+        // Filtra os atendimentos do dia usando a data operacional correta por status
+        var filteredItems = items.stream()
+                .filter(this::statusValido)
                 .filter(item -> pertenceAoDia(item, data))
-                .filter(item -> {
-                    String status = getString(item, "status");
-                    return "FINALIZADO".equals(status) || "EM_ATENDIMENTO".equals(status)
-                            || "ALTA".equals(status) || "TRANSFERIDO".equals(status);
-                })
                 .map(this::mapearAtendimento)
-                .collect(Collectors.toList());
+                .toList();
+
+        LOG.info(filteredItems);
+        LOG.infof("Total de registros filtrados: %d", filteredItems.size());
+        return filteredItems;
     }
 
     public void publicarNacional(LocalDate data, List<AtendimentoDiarioDTO> atendimentos) throws Exception {
@@ -138,15 +150,34 @@ public class ConsolidadorService {
     }
 
     private boolean pertenceAoDia(Map<String, AttributeValue> item, LocalDate data) {
-        String criadoEm = getString(item, "criado_em");
-        if (criadoEm == null) return false;
+        String timestampReferencia = getTimestampReferencia(item);
+        if (timestampReferencia == null) return false;
         try {
-            LocalDate dataCriacao = java.time.Instant.parse(criadoEm)
+            LocalDate dataCriacao = java.time.Instant.parse(timestampReferencia)
                     .atZone(BRASILIA).toLocalDate();
             return dataCriacao.equals(data);
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private boolean statusValido(Map<String, AttributeValue> item) {
+        String status = getString(item, STATUS);
+        return STATUS_FINALIZADO.equals(status) || STATUS_EM_ATENDIMENTO.equals(status)
+                || STATUS_ALTA.equals(status) || STATUS_TRANSFERIDO.equals(status);
+    }
+
+    private String getTimestampReferencia(Map<String, AttributeValue> item) {
+        String status = getString(item, STATUS);
+        if (status == null) {
+            return null;
+        }
+
+        return switch (status) {
+            case STATUS_EM_ATENDIMENTO -> getString(item, "iniciando_atendimento_em");
+            case STATUS_FINALIZADO, STATUS_ALTA, STATUS_TRANSFERIDO -> getString(item, "finalizado_em");
+            default -> null;
+        };
     }
 
     private AtendimentoDiarioDTO mapearAtendimento(Map<String, AttributeValue> item) {
