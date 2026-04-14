@@ -104,3 +104,71 @@ resource "aws_s3_bucket_policy" "frontend" {
     }]
   })
 }
+
+# ── Build e deploy do painel-clinico por instância de hospital ─────────────────
+
+locals {
+  painel_dir = "${path.module}/../../../painel-clinico"
+
+  # invoke_url do $default stage termina com "/" — removemos para evitar dupla barra
+  api_url_clean = trimsuffix(aws_apigatewayv2_stage.triagem_stage.invoke_url, "/")
+  ws_url_clean  = trimsuffix(aws_apigatewayv2_stage.ws_stage.invoke_url, "/")
+}
+
+resource "null_resource" "frontend_build_deploy" {
+  count = var.enable_frontend ? 1 : 0
+
+  triggers = {
+    api_url       = local.api_url_clean
+    ws_url        = local.ws_url_clean
+    hospital_nome = var.hospital_nome
+    bucket        = aws_s3_bucket.frontend[0].id
+    dist_id       = aws_cloudfront_distribution.frontend[0].id
+  }
+
+  # Aguarda bucket e distribuição estarem prontos
+  depends_on = [
+    aws_s3_bucket_policy.frontend,
+    aws_cloudfront_distribution.frontend,
+  ]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      set -e
+
+      # Diretório temporário isolado por hospital — evita conflito quando
+      # múltiplos módulos executam npm ci em paralelo no mesmo fonte.
+      WORK_DIR=$(mktemp -d)
+      trap 'rm -rf "$WORK_DIR"' EXIT
+
+      echo "==> [${var.hospital_id}] Copiando fontes para $WORK_DIR..."
+      cp -r "${local.painel_dir}/." "$WORK_DIR/"
+
+      echo "==> [${var.hospital_id}] Instalando dependências..."
+      cd "$WORK_DIR"
+      npm ci --prefer-offline
+
+      echo "==> [${var.hospital_id}] Gerando build com as variáveis do hospital..."
+      VITE_API_URL="${local.api_url_clean}" \
+      VITE_WS_URL="${local.ws_url_clean}" \
+      VITE_HOSPITAL_NOME="${var.hospital_nome}" \
+      npm run build
+
+      echo "==> [${var.hospital_id}] Sincronizando com S3..."
+      aws s3 sync "$WORK_DIR/dist/" s3://${aws_s3_bucket.frontend[0].id}/ \
+        --delete \
+        --cache-control "public,max-age=31536000,immutable" \
+        --exclude "index.html"
+
+      aws s3 cp "$WORK_DIR/dist/index.html" s3://${aws_s3_bucket.frontend[0].id}/index.html \
+        --cache-control "no-cache,no-store,must-revalidate"
+
+      echo "==> [${var.hospital_id}] Invalidando CloudFront ${aws_cloudfront_distribution.frontend[0].id}..."
+      aws cloudfront create-invalidation \
+        --distribution-id ${aws_cloudfront_distribution.frontend[0].id} \
+        --paths "/*"
+
+      echo "==> [${var.hospital_id}] Deploy concluído."
+    EOT
+  }
+}

@@ -98,7 +98,8 @@ export function useFilaWebSocket() {
 
   const iniciarAtendimento = useCallback(async (triagemId: string) => {
     const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
-    await fetch(`${apiUrl}/api/v1/triagem/${triagemId}/iniciar-atendimento`, {
+    const newApiUrl = apiUrl.replace('/prod/', '');
+    await fetch(`${newApiUrl}/api/v1/triagem/${triagemId}/iniciar-atendimento`, {
       method: 'POST',
     });
     setFila(prev => {
@@ -116,7 +117,8 @@ export function useFilaWebSocket() {
 
   const finalizarAtendimento = useCallback(async (triagemId: string) => {
     const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
-    await fetch(`${apiUrl}/api/v1/triagem/${triagemId}/finalizar-atendimento`, {
+    const newApiUrl = apiUrl.replace('/prod/', '');
+    await fetch(`${newApiUrl}/api/v1/triagem/${triagemId}/finalizar-atendimento`, {
       method: 'POST',
     });
     setEmAtendimento(prev => prev.filter(p => p.triagem_id !== triagemId));

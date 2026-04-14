@@ -40,6 +40,16 @@ resource "aws_rds_cluster" "nacional" {
   tags = { ManagedBy = "terraform", System = "triagem-hospitalar", Env = "prod" }
 }
 
+resource "aws_rds_cluster_instance" "nacional" {
+  identifier         = "sus-triagem-nacional-instance-1"
+  cluster_identifier = aws_rds_cluster.nacional.id
+  instance_class     = "db.serverless"
+  engine             = aws_rds_cluster.nacional.engine
+  engine_version     = aws_rds_cluster.nacional.engine_version
+
+  tags = { ManagedBy = "terraform", System = "triagem-hospitalar", Env = "prod" }
+}
+
 # Fila SQS nacional — recebe consolidados de todos os hospitais
 resource "aws_sqs_queue" "nacional" {
   name                       = "prod-sus-triagem-nacional"

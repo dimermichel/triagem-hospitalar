@@ -37,6 +37,12 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Lambda HTTP bridge — translates API Gateway events to JAX-RS -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-amazon-lambda-http</artifactId>
+    </dependency>
+
     <!-- REST -->
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -158,12 +164,6 @@
 
     <profile>
       <id>lambda</id>
-      <dependencies>
-        <dependency>
-          <groupId>io.quarkus</groupId>
-          <artifactId>quarkus-amazon-lambda-http</artifactId>
-        </dependency>
-      </dependencies>
     </profile>
   </profiles>
 </project>
