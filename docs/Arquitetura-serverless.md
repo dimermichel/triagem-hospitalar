@@ -1,43 +1,43 @@
-# Arquitetura de Microsserviços Serverless com AWS Lambda + Quarkus
+# Serverless Microservices Architecture with AWS Lambda + Quarkus
 ---
 
-## Contexto
+## Context
 
-O sistema de triagem hospitalar precisa:
-- Ser replicado para múltiplos hospitais com isolamento total de dados
-- Suportar picos de chegada de pacientes (ex: emergências coletivas)
-- Operar com custo mínimo fora dos horários de pico
-- Ser implantado rapidamente por equipes com conhecimento Java
+The hospital triage system needs to:
+- Be replicated across multiple hospitals with full data isolation
+- Handle spikes in patient arrivals (e.g., mass casualty events)
+- Operate at minimal cost outside peak hours
+- Be deployed quickly by teams with Java expertise
 
-## Decisão
+## Decision
 
-Adotar **AWS Lambda com Quarkus Serverless** como runtime de execução e **DynamoDB** como banco local por hospital.
+Adopt **AWS Lambda with Quarkus Serverless** as the execution runtime and **DynamoDB** as the local database per hospital.
 
-## Alternativas Consideradas
+## Considered Alternatives
 
-| Alternativa            | Prós                             | Contras                                  |
-|------------------------|----------------------------------|------------------------------------------|
-| ECS Fargate + RDS      | Controle total, SQL familiar     | Custo fixo alto, complexidade de escala  |
-| Lambda + Quarkus (escolha) | Scale-to-zero, deploy rápido | Cold start (mitigado com SnapStart)      |
-| Spring Boot + Lambda   | Ecossistema maior                | Cold start muito alto (5-10s sem nativo) |
-| K8s + Helm             | Portabilidade                    | Complexidade operacional alta para MVPs  |
+| Alternative              | Pros                              | Cons                                        |
+|--------------------------|-----------------------------------|---------------------------------------------|
+| ECS Fargate + RDS        | Full control, familiar SQL        | High fixed cost, complex scaling            |
+| Lambda + Quarkus (chosen)| Scale-to-zero, fast deployment    | Cold start (mitigated with SnapStart)       |
+| Spring Boot + Lambda     | Larger ecosystem                  | Very high cold start (5–10s without native) |
+| K8s + Helm               | Portability                       | High operational complexity for MVPs        |
 
-## Consequências
+## Consequences
 
-**Positivas:**
-- Custo zero fora do horário de operação
-- Escala automática em emergências coletivas
-- SnapStart do Java 21 reduz cold start de 8s para ~1s
-- Módulo Terraform parametrizado por `hospital_id` garante replicabilidade
+**Positive:**
+- Zero cost outside operating hours
+- Automatic scaling during mass casualty events
+- Java 21 SnapStart reduces cold start from 8s to ~1s
+- Terraform module parameterized by `hospital_id` ensures replicability
 
-**Negativas:**
-- Limite de 15 min de execução (adequado para o ms-consolidador com timeout de 5 min)
-- SQS com visibilidade de 30–60s requer idempotência no ms-manchester
-- WebSocket via API Gateway tem limite de 2h por conexão (client deve reconectar)
+**Negative:**
+- 15-minute execution limit (acceptable for ms-consolidador with a 5-minute timeout)
+- SQS visibility window of 30–60s requires idempotency in ms-manchester
+- WebSocket via API Gateway has a 2-hour connection limit (client must reconnect)
 
-## Mitigações
+## Mitigations
 
-- `SnapStart = PublishedVersions` em todas as Lambdas Java
-- DLQ em todas as filas SQS com alarme CloudWatch
-- `ON CONFLICT DO NOTHING` no ms-nacional-consumer para idempotência
-- Reconexão automática no `useFilaWebSocket` do painel React
+- `SnapStart = PublishedVersions` on all Java Lambdas
+- DLQ on all SQS queues with a CloudWatch alarm
+- `ON CONFLICT DO NOTHING` in ms-nacional-consumer for idempotency
+- Automatic reconnection in `useFilaWebSocket` in the React dashboard

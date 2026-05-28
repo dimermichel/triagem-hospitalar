@@ -1,47 +1,47 @@
-# Motor de Regras vs Modelo ML para Classificação Manchester
+# Rules Engine vs ML Model for Manchester Classification
 ---
 
-## Contexto
+## Context
 
-O ms-manchester precisa classificar pacientes no Protocolo de Manchester. Duas abordagens foram consideradas: motor de regras codificado e modelo de Machine Learning.
+The ms-manchester service needs to classify patients using the Manchester Protocol. Two approaches were considered: a hardcoded rules engine and a Machine Learning model.
 
-## Decisão
+## Decision
 
-Iniciar com **motor de regras** (`ManchesterEngine.java`) e preparar a arquitetura para evolução para ML.
+Start with a **rules engine** (`ManchesterEngine.java`) and design the architecture to support a future migration to ML.
 
-## Justificativa
+## Rationale
 
-| Critério               | Motor de Regras             | Modelo ML                        |
-|------------------------|-----------------------------|----------------------------------|
-| Velocidade de entrega  | ✅ Semanas                  | ❌ Meses (coleta, treino, validação) |
-| Rastreabilidade clínica | ✅ 100% auditável           | ⚠️ Caixa-preta (explainability)  |
-| Validação médica       | ✅ Revisado por enfermeiros  | ❌ Requer dados rotulados por CRM |
-| Precisão inicial       | ✅ Baseada no protocolo oficial | ✅ Potencialmente superior       |
-| Evolução futura        | ⚠️ Difícil manter 50 fluxogramas | ✅ Treino incremental         |
+| Criterion               | Rules Engine                          | ML Model                                    |
+|-------------------------|---------------------------------------|---------------------------------------------|
+| Delivery speed          | ✅ Weeks                              | ❌ Months (data collection, training, validation) |
+| Clinical traceability   | ✅ 100% auditable                     | ⚠️ Black-box (explainability concerns)      |
+| Medical validation      | ✅ Reviewed by nurses                 | ❌ Requires data labeled by clinicians      |
+| Initial accuracy        | ✅ Based on the official protocol     | ✅ Potentially superior                     |
+| Future evolution        | ⚠️ Hard to maintain 50 flowcharts    | ✅ Incremental training                     |
 
-## Caminho de Evolução
+## Evolution Path
 
-A interface `ManchesterEngine` abstrai a implementação. Para adicionar ML:
+The `ManchesterEngine` interface abstracts the implementation. To add ML:
 
 ```java
-// Atual
+// Current
 @ApplicationScoped
 public class ManchesterEngine {
     public CorManchester classificar(TriagemPayloadDTO p) { ... }
 }
 
-// Futura versão ML (mesmo contrato)
+// Future ML version (same contract)
 @Alternative @Priority(10)
 @ApplicationScoped
 public class ManchesterMLEngine extends ManchesterEngine {
     public CorManchester classificar(TriagemPayloadDTO p) {
-        return chamarSageMakerEndpoint(p);
+        return callSageMakerEndpoint(p);
     }
 }
 ```
 
-O CDI do Quarkus seleciona a implementação via `@Alternative` sem alterar o handler.
+Quarkus CDI selects the implementation via `@Alternative` without changing the handler.
 
-## Dados para Treino Futuro
+## Training Data for the Future
 
-O banco nacional já coleta `cor_manchester`, `queixa_principal`, `sinais_vitais` e `tempo_espera_min`. Após 6 meses de operação, haverá dados suficientes para treinar um modelo com revisão médica.
+The national database already collects `cor_manchester`, `queixa_principal`, `sinais_vitais`, and `tempo_espera_min`. After 6 months of operation, there will be sufficient data to train a model with medical review.

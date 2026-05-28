@@ -329,8 +329,8 @@ git checkout -b hotfix/critical-issue main
 ## 📚 Documentation
 
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — Prerequisites, development workflow, conventions, and how to add a new hospital
-- **[ADR-001](docs/ADR-001-arquitetura-serverless.md)** — Rationale for Lambda + Quarkus vs ECS/K8s
-- **[ADR-002](docs/ADR-002-motor-regras-vs-ml.md)** — Manchester rules engine vs ML model and evolution path
+- **[ADR-001](docs/Arquitetura-serverless.md)** — Rationale for Lambda + Quarkus vs ECS/K8s
+- **[ADR-002](docs/Motor-regras-vs-ml.md)** — Manchester rules engine vs ML model and evolution path
 
 ---
 
